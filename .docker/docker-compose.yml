@@ -1,0 +1,44 @@
+version: "3.7"
+
+services:
+  webserver-symfony62:
+    build: nginx
+    volumes:
+      - ../:/application:delegated
+      - phpsocket1:/var/run
+    ports:
+        - "8080:80"
+    links:
+      - fpm-nodejs-symfony62
+  fpm-nodejs-symfony62:
+    build: fpm
+    volumes:
+      - ../:/application:delegated
+      - phpsocket1:/var/run
+    ports:
+      - "3001:3001"
+    environment:
+      XDEBUG_CONFIG: remote_enable=1 remote_host=host.docker.internal profiler_enable=0
+      PHP_IDE_CONFIG: "serverName=Docker"
+    extra_hosts:
+      host.docker.internal: 172.17.0.1
+  database:
+    image: mariadb:latest
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'db'
+      MYSQL_USER: 'user'
+      MYSQL_PASSWORD: 'password'
+      MYSQL_ROOT_PASSWORD: 'password'
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+    volumes:
+      - my-db-symfony621:/var/lib/mysql
+
+
+
+volumes:
+    phpsocket1:
+    my-db-symfony621:
